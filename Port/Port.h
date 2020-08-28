@@ -75,5 +75,10 @@ typedef struct{
 }Port_ConfigType;
 
 void Port_Init( const Port_ConfigType* ConfigPtr );
+Port_Id getPortId(Port_PinType PortPinId);
+
+#if(PortSetPinDirectionApi == STD_ON)
+	void Port_SetPinDirection( Port_PinType Pin, Port_PinDirectionType Direction );
+#endif
 
 #endif
