@@ -1,7 +1,7 @@
 #include "Port.h"
-#include "tm4c123gh6pm.h"
 
 const Port_ConfigType* configuredPins;
+boolean PortPinModeChangeable[PINS_NUMBER];
 
 void Port_Init( const Port_ConfigType* ConfigPtr )
 {
@@ -15,6 +15,8 @@ void Port_Init( const Port_ConfigType* ConfigPtr )
 	{
 		port = ConfigPtr->pinsArray[itr].port;
 		PortPinId = (ConfigPtr->pinsArray[itr].PortPinId) % PINS_NUMBER_PER_PORT;
+		
+		PortPinModeChangeable[(ConfigPtr->pinsArray[itr].PortPinId)] = (ConfigPtr->pinsArray[itr].PortPinModeChangeable);
 		
 		/* Enable clock to port */
 		if(port == PORTA)
@@ -131,4 +133,40 @@ void Port_RefreshPortDirection( void )
 		REG(port, GPIODIR_OFFSET) = (REG(port, GPIODIR_OFFSET) & (~(1 << PortPinId)) ) | (configuredPins->pinsArray[itr].PortPinDirection<<PortPinId);
 	}
 }
+
+#if(PortSetPinModeApi == STD_ON)
+	void Port_SetPinMode( Port_PinType Pin, Port_PinModeType Mode )
+{
+	Port_Id portId = getPortId(Pin);
+	Pin = Pin % PINS_NUMBER_PER_PORT;
+	
+	#if(PortDevErrorDetect == STD_ON)
+		if(PortPinModeChangeable[Pin] == FALSE)
+		{
+			/*[SWS_Port_00223] ?If Det is enabled, the function Port_SetPinMode shall report
+			PORT_E_MODE_UNCHANGEABLE error and return without any other action, if the parameter
+			PortPinModeChangeable is set to FALSE */
+		}
+	#endif
+		
+	/* Configure the GPIOAFSEL register to program each bit as alternate pin */
+	REG(portId, GPIOAFSEL_OFFSET) = (REG(portId, GPIOAFSEL_OFFSET) & (~(1 << Pin)) ) | (1<<Pin);
+			
+	if(Mode == PORT_PIN_MODE_ADC)
+	{
+		/* Enable analog function for adc */
+		REG(portId, GPIOAMSEL_OFFSET) = (REG(portId, GPIOAMSEL_OFFSET) & (~(1 << Pin)) ) | (1<<Pin);
+	}
+			
+	/* other alternative functions not implemented for now */
+}
+#endif
+
+
+#if(PortVersionInfoApi == STD_ON)
+	void Port_GetVersionInfo( Std_VersionInfoType* versioninfo )
+	{
+		/* Not implented for now */
+	}
+#endif
 	
