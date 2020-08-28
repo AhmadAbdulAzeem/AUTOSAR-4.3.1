@@ -10,6 +10,18 @@
 #define STD_ON		TRUE
 #define STD_OFF		FALSE
 
+/* Switches the development error detection and notification on or off */
+#define PortDevErrorDetect  STD_OFF
+
+/* Pre-processor switch to enable / disable the use of the function Port_SetPinDirection() */
+#define PortSetPinDirectionApi STD_ON
+
+/* Pre-processor switch to enable / disable the use of the function Port_SetPinMode() */
+#define PortSetPinModeApi STD_ON
+
+/* Pre-processor switch to enable / disable the API to read out the modules version information */
+#define PortVersionInfoApi STD_OFF
+
 #define PA0						(0u)
 #define PA1						(1u)
 #define PA2						(2u)
@@ -64,6 +76,5 @@
 #define PF6						(46u)
 #define PF7						(47u)
 
-#define PortSetPinDirectionApi STD_ON 
 
 #endif	
