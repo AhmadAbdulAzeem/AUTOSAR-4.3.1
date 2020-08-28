@@ -1,44 +1,58 @@
 #include "Port.h"
 #include "tm4c123gh6pm.h"
 
+const Port_ConfigType* configuredPins;
+
 void Port_Init( const Port_ConfigType* ConfigPtr )
 {
-	uint8_t i;
-	uint8_t delay;
+	uint8_t itr;
 	Port_Id port;
 	Port_PinType PortPinId;
-	port = ConfigPtr->port;
 	
-	/* Enable clock to port */
-	if(port == PORTA)
-		SYSCTL_RCGCGPIO_R |= 1;
-	else if(port == PORTB)
-		SYSCTL_RCGCGPIO_R |= 2;
-	else if(port == PORTC)
-		SYSCTL_RCGCGPIO_R |= 4;
-	else if(port == PORTD)
-		SYSCTL_RCGCGPIO_R |= 8;
-	else if(port == PORTE)
-		SYSCTL_RCGCGPIO_R |= 16;
-	else
-		SYSCTL_RCGCGPIO_R |= 32;
-	delay = 0;		/* wait 3 clocks */
+	configuredPins = ConfigPtr;
 	
-	REG(port, GPIOLOCK_OFFSET) = 0x4C4F434B;
-	
-	for(i = 0; i < ConfigPtr->PortNumberOfPortPins; i++)
+	for(itr = 0; itr < ConfigPtr->PortNumberOfPortPins; itr++)
 	{
-		PortPinId = (ConfigPtr->pinsArray[i].PortPinId) % PINS_NUMBER_PER_PORT;
+		port = ConfigPtr->pinsArray[itr].port;
+		PortPinId = (ConfigPtr->pinsArray[itr].PortPinId) % PINS_NUMBER_PER_PORT;
+		
+		/* Enable clock to port */
+		if(port == PORTA)
+		{
+			SYSCTL_RCGCGPIO_R |= 1;
+		}
+		else if(port == PORTB)
+		{
+			SYSCTL_RCGCGPIO_R |= 2;
+		}
+		else if(port == PORTC)
+		{
+			SYSCTL_RCGCGPIO_R |= 4;
+		}
+		else if(port == PORTD)
+		{
+			SYSCTL_RCGCGPIO_R |= 8;
+		}
+		else if(port == PORTE)
+		{
+			SYSCTL_RCGCGPIO_R |= 16;
+		}
+		else
+		{
+			SYSCTL_RCGCGPIO_R |= 32;
+		}
+		
+		REG(port, GPIOLOCK_OFFSET) = 0x4C4F434B;
 		
 		/* Set the direction of the GPIO port pin */
-		REG(port, GPIODIR_OFFSET) = (REG(port, GPIODIR_OFFSET) & (~(1 << PortPinId)) ) | (ConfigPtr->pinsArray[i].PortPinDirection<<PortPinId);
+		REG(port, GPIODIR_OFFSET) = (REG(port, GPIODIR_OFFSET) & (~(1 << PortPinId)) ) | (ConfigPtr->pinsArray[itr].PortPinDirection<<PortPinId);
 		
-		if(ConfigPtr->pinsArray[i].PortPinInitialMode != PORT_PIN_MODE_DIO)
+		if(ConfigPtr->pinsArray[itr].PortPinInitialMode != PORT_PIN_MODE_DIO)
 		{
 			/* Configure the GPIOAFSEL register to program each bit as alternate pin */
 			REG(port, GPIOAFSEL_OFFSET) = (REG(port, GPIOAFSEL_OFFSET) & (~(1 << PortPinId)) ) | (1<<PortPinId);
 			
-			if(ConfigPtr->pinsArray[i].PortPinInitialMode == PORT_PIN_MODE_ADC)
+			if(ConfigPtr->pinsArray[itr].PortPinInitialMode == PORT_PIN_MODE_ADC)
 			{
 				/* Enable analog function for adc */
 				REG(port, GPIOAMSEL_OFFSET) = (REG(port, GPIOAMSEL_OFFSET) & (~(1 << PortPinId)) ) | (1<<PortPinId);
@@ -55,14 +69,14 @@ void Port_Init( const Port_ConfigType* ConfigPtr )
 			REG(port, GPIODEN_OFFSET) = (REG(port, GPIODEN_OFFSET) & (~(1 << PortPinId)) ) | (1<<PortPinId);
 			
 			/* write pin level */
-			if(ConfigPtr->pinsArray[i].PortPinDirection == PORT_PIN_OUT)
+			if(ConfigPtr->pinsArray[itr].PortPinDirection == PORT_PIN_OUT)
 			{
-				REG(port, GPIODATA_OFFSET) = (REG(port, GPIODATA_OFFSET) & (~(1 << PortPinId)) ) | (ConfigPtr->pinsArray[i].PortPinLevelValue<<PortPinId);
+				REG(port, GPIODATA_OFFSET) = (REG(port, GPIODATA_OFFSET) & (~(1 << PortPinId)) ) | (ConfigPtr->pinsArray[itr].PortPinLevelValue<<PortPinId);
 			}
 		}
 		
 		/* configure pullup resistor */
-		REG(port, GPIOPUR_OFFSET) = (REG(port, GPIOPUR_OFFSET) & (~(1 << PortPinId)) ) | (ConfigPtr->pinsArray[i].pullUp<<PortPinId);
+		REG(port, GPIOPUR_OFFSET) = (REG(port, GPIOPUR_OFFSET) & (~(1 << PortPinId)) ) | (ConfigPtr->pinsArray[itr].pullUp<<PortPinId);
 	}
 	
 }
@@ -94,3 +108,27 @@ Port_Id getPortId(Port_PinType PortPinId)
 		REG(portId, GPIODIR_OFFSET) = (REG(portId, GPIODIR_OFFSET) & (~(1 << Pin)) ) | (Direction<<Pin);
 	}
 #endif
+	
+void Port_RefreshPortDirection( void )
+{
+	uint8_t itr;
+	Port_Id port;
+	Port_PinType PortPinId;
+	uint8_t numberOfPins = configuredPins->PortNumberOfPortPins;
+	
+	for(itr = 0; itr < numberOfPins; itr++)
+	{
+		port = configuredPins->pinsArray[itr].port;
+		PortPinId = (configuredPins->pinsArray[itr].PortPinId) % PINS_NUMBER_PER_PORT;
+		if(configuredPins->pinsArray[itr].PortPinDirectionChangeable == TRUE)
+		{
+			/* [SWS_Port_00061] ?The function Port_RefreshPortDirection shall
+			exclude those port pins from refreshing that are configured as
+			pin direction changeable during runtime‘.? (SRS_Port_12406) */
+			continue;
+		}
+		/* Set the direction of the GPIO port pin */
+		REG(port, GPIODIR_OFFSET) = (REG(port, GPIODIR_OFFSET) & (~(1 << PortPinId)) ) | (configuredPins->pinsArray[itr].PortPinDirection<<PortPinId);
+	}
+}
+	
