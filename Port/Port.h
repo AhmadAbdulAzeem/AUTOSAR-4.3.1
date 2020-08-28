@@ -47,6 +47,8 @@ typedef enum{
 	PORTF = 0x40025000
 }Port_Id;
 
+typedef uint32_t Std_VersionInfoType;
+
 /* Type of the external data structure containing the initialization data for this module */
 typedef struct{
 	/* The initial direction of the pin (IN or OUT) */
@@ -68,6 +70,9 @@ typedef struct{
 	boolean pullUp;
 	
 	Port_Id port;
+	
+	/* Parameter to indicate if the mode is changeable on a port pin during runtime. */
+	boolean PortPinModeChangeable;
 }PortPin;
 
 typedef struct{
@@ -83,5 +88,13 @@ Port_Id getPortId(Port_PinType PortPinId);
 #endif
 
 void Port_RefreshPortDirection( void );
+
+#if(PortSetPinModeApi == STD_ON)
+	void Port_SetPinMode( Port_PinType Pin, Port_PinModeType Mode );
+#endif
+
+#if(PortVersionInfoApi == STD_ON)
+	void Port_GetVersionInfo( Std_VersionInfoType* versioninfo );
+#endif
 
 #endif
