@@ -1,5 +1,4 @@
 #include "Port.h"
-#include "tm4c123gh6pm.h"
 
 void Port_Init( const Port_ConfigType* ConfigPtr )
 {
