@@ -1,4 +1,5 @@
 #include "Port.h"
+#include "tm4c123gh6pm.h"
 
 void Port_Init( const Port_ConfigType* ConfigPtr )
 {
@@ -27,7 +28,7 @@ void Port_Init( const Port_ConfigType* ConfigPtr )
 	
 	for(i = 0; i < ConfigPtr->PortNumberOfPortPins; i++)
 	{
-		PortPinId = ConfigPtr->pinsArray[i].PortPinId;
+		PortPinId = (ConfigPtr->pinsArray[i].PortPinId) % PINS_NUMBER_PER_PORT;
 		
 		/* Set the direction of the GPIO port pin */
 		REG(port, GPIODIR_OFFSET) = (REG(port, GPIODIR_OFFSET) & (~(1 << PortPinId)) ) | (ConfigPtr->pinsArray[i].PortPinDirection<<PortPinId);
@@ -65,3 +66,31 @@ void Port_Init( const Port_ConfigType* ConfigPtr )
 	}
 	
 }
+
+Port_Id getPortId(Port_PinType PortPinId)
+{
+	uint8_t port;
+	port = ( (PortPinId/PINS_NUMBER_PER_PORT) % (PORTS_NUMBER) );
+	if(port == 0)
+		return PORTA;
+	else if(port == 1)
+		return PORTB;
+	else if(port == 2)
+		return PORTC;
+	else if(port == 3)
+		return PORTD;
+	else if(port == 4)
+		return PORTE;
+	else
+		return PORTF;
+}
+
+#if(PortSetPinDirectionApi == STD_ON)
+	void Port_SetPinDirection( Port_PinType Pin, Port_PinDirectionType Direction )
+	{
+		Port_Id portId = getPortId(Pin);
+		Pin = Pin % PINS_NUMBER_PER_PORT;
+		/* Set the direction of the GPIO port pin */
+		REG(portId, GPIODIR_OFFSET) = (REG(portId, GPIODIR_OFFSET) & (~(1 << Pin)) ) | (Direction<<Pin);
+	}
+#endif
