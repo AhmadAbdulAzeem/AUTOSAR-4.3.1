@@ -66,10 +66,11 @@ typedef struct{
 	
 	/* Activation of internal pull-ups. */
 	boolean pullUp;
+	
+	Port_Id port;
 }PortPin;
 
 typedef struct{
-	Port_Id port;
 	PortPin* pinsArray;
 	uint8_t PortNumberOfPortPins;
 }Port_ConfigType;
@@ -80,5 +81,7 @@ Port_Id getPortId(Port_PinType PortPinId);
 #if(PortSetPinDirectionApi == STD_ON)
 	void Port_SetPinDirection( Port_PinType Pin, Port_PinDirectionType Direction );
 #endif
+
+void Port_RefreshPortDirection( void );
 
 #endif
