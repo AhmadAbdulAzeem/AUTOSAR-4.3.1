@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ProjectConfig xmlns:i="http://www.w3.org/2001/XMLSchema-instance" z:Id="1" xmlns:z="http://schemas.microsoft.com/2003/10/Serialization/" xmlns="http://schemas.datacontract.org/2004/07/SAAT.ConfigHandler">
+  <ArxmlFilePath z:Id="2">E:\Courses\AUTOSAR\SAAT\SAAT_V1.0.2\SeatCtrlApp_Task34_Part1\SeatCtrlApp_Task34_Part1.arxml</ArxmlFilePath>
+  <FilePath z:Id="3">E:\Courses\AUTOSAR\SAAT\SAAT_V1.0.2\SeatCtrlApp_Task34_Part1\SeatCtrlApp_Task34_Part1.xml</FilePath>
+  <ProjectName z:Id="4">SeatCtrlApp_Task2</ProjectName>
+  <TopCompositionName z:Id="5">SeatCtrlApp_Task2Composition</TopCompositionName>
+</ProjectConfig>
