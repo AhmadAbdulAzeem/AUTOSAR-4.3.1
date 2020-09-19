@@ -1,0 +1,8 @@
+﻿  HMI.c
+E:\Courses\AUTOSAR\SeatCtrlApp_Task6_Solution\src\app\appswcs\HMI.c(60,41): warning C4013: 'Rte_Read_rpSeatCtrlData_Inclne' undefined; assuming extern returning int
+E:\Courses\AUTOSAR\SeatCtrlApp_Task6_Solution\src\app\appswcs\HMI.c(62,49): warning C4013: 'Rte_IsUpdated_rpSeatCtrlData_Inclne' undefined; assuming extern returning int
+  vfb.c
+  Generating Code...
+HMI.obj : error LNK2019: unresolved external symbol _Rte_Read_rpSeatCtrlData_Inclne referenced in function _HMI_MainFunction
+HMI.obj : error LNK2019: unresolved external symbol _Rte_IsUpdated_rpSeatCtrlData_Inclne referenced in function _HMI_MainFunction
+E:\Courses\AUTOSAR\SeatCtrlApp_Task6_Solution\SeatCtrlApp\Debug\SeatCtrlApp.exe : fatal error LNK1120: 2 unresolved externals
